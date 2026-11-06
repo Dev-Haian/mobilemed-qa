@@ -52,24 +52,29 @@ test.describe('Pacientes e exames pela interface', () => {
     await expect(patients.dialog()).toBeVisible();
   });
 
-  test('E2E12 - editar um paciente não altera os outros da lista', async ({ page }) => {
+  test('E2E12 - editar um paciente não altera os outros da lista (sem recarregar a página)', async ({ page }) => {
     const patients = new PatientsPage(page);
-    const nameA = uniqueName('E2E-A');
     const nameB = uniqueName('E2E-B');
-    await patients.create(nameA, validCpf());
     await patients.create(nameB, validCpf());
     await patients.goto();
 
-    const edited = `${nameB} EDITADO`;
+    // Guarda o paciente da primeira linha antes da edição
+    await expect(patients.rows().first()).toBeVisible();
+    const firstRowBefore = (await patients.rows().first().locator('td').first().innerText()).trim();
+    expect(firstRowBefore).not.toBe(nameB.toUpperCase());
+
     await patients.filter(nameB.toUpperCase());
     await patients.openEdit(nameB);
-    await patients.dialog().locator('input[formcontrolname="name"]').fill(edited);
+    await patients.dialog().locator('input[formcontrolname="name"]').fill(`${nameB} EDITADO`);
     const res = await patients.save();
     expect(res.status()).toBe(200);
 
+    // Sem recarregar: o primeiro paciente da lista precisa continuar lá
     await patients.filter('');
-    await patients.filter(nameA.toUpperCase());
-    await expect(patients.rowByName(nameA), 'o paciente A sumiu ou mudou depois de editar o B').toHaveCount(1);
+    await expect(
+      patients.rows().filter({ hasText: firstRowBefore }),
+      `o paciente "${firstRowBefore}" foi substituído na lista depois de editar outro paciente`,
+    ).toHaveCount(1);
   });
 
   test('E2E13 - cadastra exame para um paciente e ele aparece na tela de exames', async ({ page }) => {

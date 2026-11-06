@@ -21,7 +21,7 @@ test.describe('Pacientes - cadastro (POST /pacientes)', () => {
     const first = await createPatient(request, token, { document });
     expect(first.res.status()).toBe(201);
     const second = await createPatient(request, token, { document, name: uniqueName('Duplicado') });
-    expect(second.res.status()).toBe(409);
+    expect.soft(second.res.status()).toBe(409);
     expectNoInternalLeak(second.body);
   });
 
@@ -62,13 +62,13 @@ test.describe('Pacientes - cadastro (POST /pacientes)', () => {
 
   test('CT15 - nome acima do limite do banco (150) retorna 400, não 500', async ({ request }) => {
     const { res, body } = await createPatient(request, token, { name: 'A'.repeat(151) });
-    expect(res.status()).toBe(400);
+    expect.soft(res.status()).toBe(400);
     expectNoInternalLeak(body);
   });
 
   test('CT16 - documento acima do limite do banco (32) retorna 400, não 500', async ({ request }) => {
     const { res, body } = await createPatient(request, token, { document: '9'.repeat(33) });
-    expect(res.status()).toBe(400);
+    expect.soft(res.status()).toBe(400);
     expectNoInternalLeak(body);
   });
 });

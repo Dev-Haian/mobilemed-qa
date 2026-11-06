@@ -10,7 +10,7 @@ test.describe('Segurança e privacidade (dados de saúde / LGPD)', () => {
   test('CT50 - erro interno não devolve stack trace nem SQL ao cliente', async ({ request }) => {
     // id fora do formato UUID força um erro no banco
     const res = await request.get('/pacientes/id-invalido', { headers: auth(token) });
-    expect(res.status()).toBeLessThan(500);
+    expect.soft(res.status()).toBeLessThan(500);
     expectNoInternalLeak(await safeJson(res));
   });
 

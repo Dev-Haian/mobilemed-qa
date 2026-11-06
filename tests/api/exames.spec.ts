@@ -44,7 +44,7 @@ test.describe('Exames - cadastro (POST /exames)', () => {
       modality: 'CT',
       idempotencyKey: newKey(),
     });
-    expect(res.status()).toBe(404);
+    expect.soft(res.status()).toBe(404);
     expectNoInternalLeak(body);
   });
 

@@ -3,7 +3,7 @@ import { Locator, Page, expect } from '@playwright/test';
 export class PatientsPage {
   constructor(private readonly page: Page) {}
 
-  heading = () => this.page.getByRole('heading', { name: 'Pacientes' });
+  heading = () => this.page.getByRole('heading', { name: 'Pacientes', exact: true });
   newButton = () => this.page.getByRole('button', { name: /novo paciente/i });
   search = () => this.page.getByPlaceholder(/buscar por/i);
   rows = () => this.page.locator('tr.table-row');
@@ -41,7 +41,9 @@ export class PatientsPage {
   }
 
   async filter(text: string) {
-    if (await this.search().isVisible()) await this.search().fill(text);
+    if (!(await this.search().isVisible())) return;
+    await this.search().fill(text);
+    await this.search().press('End'); // o filtro do Angular escuta o evento keyup
   }
 
   async openEdit(name: string) {
