@@ -4,6 +4,10 @@ Solução do teste técnico de QA da Mobilemed: plano de testes, cenários em Gh
 
 Autor: **Haian Vilas Boas**
 
+## Resultado
+
+**65 testes automatizados** (59 de API e 6 de E2E): 43 passaram e 22 falharam, revelando **14 defeitos**. Foram 11 confirmados e 3 bloqueados por um defeito crítico. O principal: **o cadastro de exames responde 201 mas não grava nada**. Detalhes, evidências e sugestões de correção em [`docs/relatorio-de-bugs.md`](docs/relatorio-de-bugs.md).
+
 ## O que tem aqui
 
 | Pasta | Conteúdo |

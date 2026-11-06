@@ -1,10 +1,29 @@
 # Relatório de defeitos – Mobilemed
 
-> **Status:** levantamento inicial por **análise estática do código**. Cada item aponta o teste automatizado que o confirma.
-> Após a execução no GitHub Actions, a coluna "Confirmado" é atualizada com a evidência (relatório do Playwright e logs).
+> **Status:** defeitos confirmados executando os testes no GitHub Actions contra a aplicação real (PostgreSQL 17 + API + front).
+> Resultado da execução: **65 testes, 43 passaram e 22 falharam**. Cada falha corresponde a um defeito abaixo. O relatório HTML, os traces e os vídeos estão no artefato `relatorio-qa` da execução.
+> Os itens foram levantados primeiro por análise estática do código e depois confirmados (ou não) na execução.
 
-| ID | Título | Severidade | Teste | Confirmado |
+| ID | Título | Severidade | Teste | Status |
 |---|---|---|---|---|
+| BUG01 | Cadastro de exame responde 201, mas não grava o exame | **Crítica** | CT30, CT40, CT42, CT43, E2E13 | ✅ Confirmado |
+| BUG02 | Busca por id de paciente e de exame retorna 500 | Alta | CT17, CT37 | ✅ Confirmado |
+| BUG03 | Documento duplicado retorna 500 em vez de 409 | Alta | CT11 | ✅ Confirmado |
+| BUG04 | Exame para paciente inexistente não é tratado | Alta | CT33, CT34 | ⏸️ Bloqueado pelo BUG01 |
+| BUG05 | Condição de corrida na idempotência (requisições simultâneas) | Alta | CT42 | ⏸️ Bloqueado pelo BUG01 |
+| BUG06 | Respostas de erro expõem stack trace (`stark`) | Alta | CT11, CT15, CT16, CT50 | ✅ Confirmado |
+| BUG07 | API aceita CPF inválido (validação só no front) | Média | CT13 | ✅ Confirmado |
+| BUG08 | Cliente consegue gravar `createdBy` falso na auditoria | Média | CT14b | ✅ Confirmado |
+| BUG09 | Front: editar um paciente substitui outro paciente na lista | Média | E2E12 | ✅ Confirmado |
+| BUG10 | `GET /exames` ignora a paginação documentada no README | Média | CT38 | ⏸️ Mascarado pelo BUG01 (só existe 1 exame) |
+| BUG11 | Página vazia retorna 404 e não há limite de `pageSize` | Baixa | CT21, CT22 | ✅ Confirmado |
+| BUG12 | Login inválido retorna 404 em vez de 401 | Baixa | CT02, CT03 | ✅ Confirmado |
+| BUG13 | Nome acima de 150 ou documento acima de 32 caracteres retornam 500 | Média | CT15, CT16 | ✅ Confirmado (novo) |
+| BUG14 | Resposta do login devolve o e-mail do usuário no campo `url` | Baixa | CT53 | ✅ Confirmado (novo) |
+
+**Sobre os bloqueados:** como o BUG01 impede qualquer exame de ser gravado, as validações que dependem da inserção (paciente inexistente, formato do `patientId`, tamanho da chave, concorrência) nunca chegam a ser executadas. Elas respondem 201 sem gravar. Esses testes devem ser reexecutados depois da correção do BUG01.
+
+---|---|---|---|---|
 | BUG01 | Cadastro de exame não grava o exame (verificação de idempotência sempre verdadeira) | Crítica | CT30, CT31, E2E13 | a confirmar |
 | BUG02 | Busca por id de paciente e de exame quebra (parâmetro da query com nome errado) | Alta | CT17, CT37 | a confirmar |
 | BUG03 | Documento duplicado retorna 500 em vez de 409 | Alta | CT11 | a confirmar |
@@ -31,7 +50,7 @@
 3. Consultar `GET /exames`.
 
 **Esperado:** 201 com o exame criado, e o exame presente na listagem.
-**Suspeita:** a resposta vem sem o exame e nada é gravado.
+**Obtido:** 201 com corpo vazio, e o exame não aparece na listagem. Pela interface (E2E13), a tela mostra "Exame criado com sucesso", mas o exame não existe.
 
 **Sugestão de correção:** `if (created.data) { ... }`
 
@@ -74,6 +93,8 @@ O front valida o CPF (`validateCPF`), mas o `PatientDto` só exige `IsString`/`I
 O `AuditSubscriber` faz `entity.createdBy = entity.createdBy || usuário`. Como `createdBy` está no DTO, o cliente pode enviar o valor que quiser.
 
 ## BUG09 – Front: edição de paciente corrompe a lista
+**Evidência (E2E12):** depois de editar outro paciente, o primeiro da lista ("SAMUEL BERTONI", do seed) some da tela sem recarregar a página.
+
 `patient.service.ts`: `current.findIndex((p) => (p.id = dto.id!))` usa `=` (atribuição). O primeiro item da lista recebe o id do paciente editado e é substituído na tela.
 
 ## BUG10 – Contrato do README divergente
@@ -85,6 +106,15 @@ O README documenta `GET /exames?page=x&pageSize=y`, mas essa rota chama `findAll
 
 ## BUG12 – Código de status do login
 Credenciais inválidas retornam **404 Not Found**, quando o correto é **401 Unauthorized**.
+
+---
+
+## BUG13 – Tamanho dos campos não validado
+O `PatientDto` não tem `MaxLength`. Um nome com 151 caracteres ou um documento com 33 chega ao banco, que recusa, e a API responde 500 com o stack trace.
+**Sugestão:** `@MaxLength(150)` no nome e `@MaxLength(32)` no documento (e `@MaxLength(128)` na `idempotencyKey`).
+
+## BUG14 – E-mail do usuário no envelope do login
+`AuthRepository.login` monta `url: /auth/login/${userEmail}`. O e-mail aparece na resposta e pode acabar em logs.
 
 ---
 
