@@ -1,0 +1,86 @@
+name: QA - Mobilemed
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: mobilemed
+          POSTGRES_PASSWORD: mob@teste
+          POSTGRES_DB: mobilemed
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mobilemed"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout dos testes
+        uses: actions/checkout@v4
+
+      - name: Checkout da aplicação (desafio Mobilemed)
+        uses: actions/checkout@v4
+        with:
+          repository: mobilemed-dev/desafio-tecnico-QA-III
+          path: app
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Backend - instalar, migrar e popular o banco
+        working-directory: app/backend
+        run: |
+          cp .env.example .env.development
+          npm ci
+          npm run db:migrate
+          npm run db:seed
+
+      - name: Backend - subir a API
+        working-directory: app/backend
+        run: |
+          nohup npm run start:dev > ../../backend.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/docs > /dev/null && echo "API no ar" && exit 0; sleep 3; done
+          echo "API não subiu"; cat ../../backend.log; exit 1
+
+      - name: Frontend - instalar e subir
+        working-directory: app/frontend
+        run: |
+          npm ci
+          nohup npx ng serve --port 4200 > ../../frontend.log 2>&1 &
+          for i in $(seq 1 100); do curl -sf http://localhost:4200 > /dev/null && echo "Front no ar" && exit 0; sleep 3; done
+          echo "Front não subiu"; cat ../../frontend.log; exit 1
+
+      - name: Instalar Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Rodar testes (API + E2E)
+        continue-on-error: true
+        run: npx playwright test
+
+      - name: Resumo dos resultados
+        if: always()
+        run: node scripts/summary.js >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Publicar relatório e logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-qa
+          path: |
+            playwright-report/
+            test-results/
+            backend.log
+            frontend.log
