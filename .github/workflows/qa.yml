@@ -72,7 +72,7 @@ jobs:
 
       - name: Resumo dos resultados
         if: always()
-        run: node scripts/summary.js >> "$GITHUB_STEP_SUMMARY" || true
+        run: node scripts/report-md.js test-results/results.json >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Publicar relatório e logs
         if: always()
