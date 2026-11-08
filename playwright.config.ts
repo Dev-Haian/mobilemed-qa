@@ -10,6 +10,23 @@ export default defineConfig({
   use: { trace: 'retain-on-failure', screenshot: 'only-on-failure', video: 'retain-on-failure' },
   projects: [
     { name: 'api', testDir: './tests/api', use: { baseURL: API_URL } },
-    { name: 'e2e', testDir: './tests/e2e', use: { ...devices['Desktop Chrome'], baseURL: WEB_URL } },
+    {
+      name: 'e2e',
+      testDir: './tests/e2e',
+      testIgnore: /responsividade/,
+      use: { ...devices['Desktop Chrome'], baseURL: WEB_URL },
+    },
+    {
+      name: 'mobile',
+      testDir: './tests/e2e',
+      testMatch: /responsividade/,
+      use: { ...devices['Pixel 7'], baseURL: WEB_URL },
+    },
+    {
+      name: 'tablet',
+      testDir: './tests/e2e',
+      testMatch: /responsividade/,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 }, isMobile: true, hasTouch: true, baseURL: WEB_URL },
+    },
   ],
 });
