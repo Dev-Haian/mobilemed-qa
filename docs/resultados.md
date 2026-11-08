@@ -1,10 +1,10 @@
 # Resultados da execução
 
-Execução de **06/11/2026, 11:11:30** (GitHub Actions, aplicação real com PostgreSQL 17 + API NestJS + front Angular) · duração dos testes: **30 s**
+Execução de **08/11/2026, 20:14:50** (GitHub Actions, aplicação real com PostgreSQL 17 + API NestJS + front Angular; interface em desktop, celular Pixel 7 e tablet 768px) · duração dos testes: **36 s**
 
 | Total | ✅ Passaram | ❌ Falharam (defeitos) | Taxa de aprovação |
 |---:|---:|---:|---:|
-| **65** | **43** | **22** | 66% |
+| **78** | **51** | **27** | 65% |
 
 > Os testes descrevem o comportamento **esperado** da plataforma. Cada falha corresponde a um defeito documentado em [relatorio-de-bugs.md](relatorio-de-bugs.md).
 
@@ -19,8 +19,11 @@ Execução de **06/11/2026, 11:11:30** (GitHub Actions, aplicação real com Pos
 | API | Pacientes - cadastro (POST /pacientes) | 12 | 7 | 5 |
 | API | Pacientes - consulta | 9 | 6 | 3 |
 | API | Segurança e privacidade (dados de saúde / LGPD) | 4 | 2 | 2 |
+| E2E | Acessibilidade (axe-core / WCAG 2.1 AA) | 3 | 1 | 2 |
 | E2E | Login | 3 | 3 | 0 |
 | E2E | Pacientes e exames pela interface | 4 | 2 | 2 |
+| MOBILE | Responsividade | 5 | 3 | 2 |
+| TABLET | Responsividade | 5 | 4 | 1 |
 
 ## Todos os testes
 
@@ -84,6 +87,9 @@ Execução de **06/11/2026, 11:11:30** (GitHub Actions, aplicação real com Pos
 | API | CT51 - listagem de usuários do sistema não expõe senha (hash) | ✅ |  |
 | API | CT52 - endpoints de usuários exigem autenticação | ✅ |  |
 | API | CT53 - resposta de login não devolve o e-mail na URL do envelope | ❌ | BUG14 |
+| E2E | A11Y01 - tela de login | ✅ |  |
+| E2E | A11Y02 - lista de pacientes | ❌ | BUG17 |
+| E2E | A11Y03 - formulário de cadastro de paciente | ❌ | BUG17 |
 | E2E | E2E01 - login válido leva à tela de pacientes | ✅ |  |
 | E2E | E2E02 - login com senha errada mantém o usuário na tela de login | ✅ |  |
 | E2E | E2E03 - acessar /patients sem login redireciona para /login | ✅ |  |
@@ -91,3 +97,13 @@ Execução de **06/11/2026, 11:11:30** (GitHub Actions, aplicação real com Pos
 | E2E | E2E11 - CPF inválido é bloqueado no formulário | ✅ |  |
 | E2E | E2E12 - editar um paciente não altera os outros da lista (sem recarregar a página) | ❌ | BUG09 |
 | E2E | E2E13 - cadastra exame para um paciente e ele aparece na tela de exames | ❌ | BUG01 |
+| MOBILE | R01 - tela de login cabe na tela sem rolagem horizontal | ✅ |  |
+| TABLET | R01 - tela de login cabe na tela sem rolagem horizontal | ✅ |  |
+| MOBILE | R02 - na lista de pacientes, o conteúdo ocupa a maior parte da tela | ❌ | BUG15 |
+| TABLET | R02 - na lista de pacientes, o conteúdo ocupa a maior parte da tela | ❌ | BUG15 |
+| MOBILE | R03 - botão "Novo Paciente" e busca ficam visíveis dentro da tela | ❌ | BUG16 |
+| TABLET | R03 - botão "Novo Paciente" e busca ficam visíveis dentro da tela | ✅ | BUG16 |
+| MOBILE | R04 - formulário de cadastro de paciente cabe na tela | ✅ |  |
+| TABLET | R04 - formulário de cadastro de paciente cabe na tela | ✅ |  |
+| MOBILE | R05 - é possível navegar para a tela de exames | ✅ |  |
+| TABLET | R05 - é possível navegar para a tela de exames | ✅ |  |

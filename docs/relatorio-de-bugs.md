@@ -1,7 +1,7 @@
 # Relatório de defeitos – Mobilemed
 
 > **Status:** defeitos confirmados executando os testes no GitHub Actions contra a aplicação real (PostgreSQL 17 + API + front).
-> Resultado da execução: **65 testes, 43 passaram e 22 falharam**. Cada falha corresponde a um defeito abaixo. O relatório HTML, os traces e os vídeos estão no artefato `relatorio-qa` da execução.
+> Resultado da execução: **78 testes, 51 passaram e 27 falharam** (inclui responsividade em celular e tablet e acessibilidade com axe-core). Cada falha corresponde a um defeito abaixo. O relatório HTML, os traces e os vídeos estão no artefato `relatorio-qa` da execução.
 > Os itens foram levantados primeiro por análise estática do código e depois confirmados (ou não) na execução.
 
 | ID | Título | Severidade | Teste | Status |
@@ -20,6 +20,9 @@
 | BUG12 | Login inválido retorna 404 em vez de 401 | Baixa | CT02, CT03 | ✅ Confirmado |
 | BUG13 | Nome acima de 150 ou documento acima de 32 caracteres retornam 500 | Média | CT15, CT16 | ✅ Confirmado (novo) |
 | BUG14 | Resposta do login devolve o e-mail do usuário no campo `url` | Baixa | CT53 | ✅ Confirmado (novo) |
+| BUG15 | Interface não é responsiva: menu lateral fixo ocupa a tela no celular | **Alta** | R02 (mobile e tablet) | ✅ Confirmado |
+| BUG16 | Campo de busca ultrapassa a largura da tela no celular | Média | R03 (mobile) | ✅ Confirmado |
+| BUG17 | Acessibilidade: 57 botões sem nome acessível, contraste insuficiente e autocomplete inválido | Média | A11Y02, A11Y03 | ✅ Confirmado |
 
 **Sobre os bloqueados:** como o BUG01 impede qualquer exame de ser gravado, as validações que dependem da inserção (paciente inexistente, formato do `patientId`, tamanho da chave, concorrência) nunca chegam a ser executadas. Elas respondem 201 sem gravar. Esses testes devem ser reexecutados depois da correção do BUG01.
 
@@ -115,6 +118,28 @@ O `PatientDto` não tem `MaxLength`. Um nome com 151 caracteres ou um documento 
 
 ## BUG14 – E-mail do usuário no envelope do login
 `AuthRepository.login` monta `url: /auth/login/${userEmail}`. O e-mail aparece na resposta e pode acabar em logs.
+
+---
+
+## BUG15 – Interface não é responsiva (menu lateral fixo)
+**Severidade:** Alta, porque o README do desafio promete "Interface responsiva com Angular Material".
+**Componente:** `frontend/src/app/layout/layout.ts`: `isMobile = false`, `mode = 'side'` e `opened = true` estão fixos no código, sem `BreakpointObserver`.
+**Evidência (R02):** no celular (Pixel 7, 412px), o menu lateral de 235px deixa só **177px** para o conteúdo: nomes quebram em várias linhas e a tabela fica cortada. No tablet (768px), sobram 533px. A página de login é responsiva, porque tem `@media` próprio.
+
+![Lista de pacientes no celular](evidencias/mobile-pacientes.png)
+
+**Sugestão:** usar o `BreakpointObserver` do Angular CDK para, abaixo de 960px, trocar o menu para `mode="over"`, fechado, com um botão de menu (hambúrguer) no topo.
+
+## BUG16 – Busca ultrapassa a tela no celular
+**Evidência (R03):** o campo "Buscar por..." termina em 555px numa tela de 412px, cortado na lateral. Causa: `min-width: 280px` no `patients.scss`, somado ao menu fixo.
+
+## BUG17 – Problemas de acessibilidade (WCAG 2.1 AA)
+Verificação automática com axe-core:
+- **button-name (57 ocorrências):** os botões só com ícone (editar, novo exame, paginação) não têm `aria-label`, e um leitor de tela anuncia só "botão".
+- **color-contrast (2):** textos com contraste abaixo de 4,5:1.
+- **autocomplete-valid (1):** atributo `autocomplete` com valor inválido no formulário.
+
+Além disso, o texto alternativo do logo é **"Logo Cannoli"**, copiado de outro projeto.
 
 ---
 

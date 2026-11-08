@@ -8,10 +8,12 @@ Verificar se a plataforma de pacientes e exames de imagem atende às regras de n
 | Dentro do escopo | Fora do escopo |
 |---|---|
 | Autenticação JWT (`POST /auth/login`) e proteção das rotas | Teste de carga e estresse |
-| Pacientes: cadastro, unicidade do documento, validações, paginação, busca por id | Compatibilidade entre navegadores (só Chromium) |
-| Exames: cadastro, modalidades DICOM, paciente inexistente, idempotência e concorrência | Acessibilidade (WCAG) |
+| Pacientes: cadastro, unicidade do documento, validações, paginação, busca por id | Compatibilidade entre navegadores |
+| Exames: cadastro, modalidades DICOM, paciente inexistente, idempotência e concorrência | Auditoria manual de acessibilidade |
 | Tratamento de erros e exposição de dados | Testes de invasão |
 | Fluxos principais da interface (login, paciente, exame) | Upload e visualização de imagens DICOM |
+| Responsividade em celular (412px) e tablet (768px) | Navegadores além do Chromium |
+| Acessibilidade automática (axe-core, WCAG 2.1 AA) | Auditoria manual de acessibilidade com leitor de tela |
 
 ## 3. Análise de risco (o que priorizei e por quê)
 

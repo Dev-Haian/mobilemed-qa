@@ -1,8 +1,8 @@
 # QA – Plataforma Médica Mobilemed
 
-![Testes](https://img.shields.io/badge/testes-65-blue) ![Passaram](https://img.shields.io/badge/passaram-43-brightgreen) ![Falharam](https://img.shields.io/badge/falharam%20(defeitos)-22-red) ![Defeitos](https://img.shields.io/badge/defeitos-14-orange) ![Playwright](https://img.shields.io/badge/Playwright-API%20%2B%20E2E-2EAD33?logo=playwright) ![CI](https://github.com/Dev-Haian/mobilemed-qa/actions/workflows/qa.yml/badge.svg)
+![Testes](https://img.shields.io/badge/testes-78-blue) ![Passaram](https://img.shields.io/badge/passaram-51-brightgreen) ![Falharam](https://img.shields.io/badge/falharam%20(defeitos)-27-red) ![Defeitos](https://img.shields.io/badge/defeitos-17-orange) ![Responsivo](https://img.shields.io/badge/mobile%20%2B%20tablet-testado-blueviolet) ![A11y](https://img.shields.io/badge/acessibilidade-axe--core-informational) ![Playwright](https://img.shields.io/badge/Playwright-API%20%2B%20E2E-2EAD33?logo=playwright) ![CI](https://github.com/Dev-Haian/mobilemed-qa/actions/workflows/qa.yml/badge.svg)
 
-Solução do teste técnico de QA da Mobilemed. O projeto testa a aplicação **real**: o GitHub Actions sobe o PostgreSQL 17, a API NestJS e o front Angular do desafio e roda **65 testes automatizados** de API e de interface com Playwright.
+Solução do teste técnico de QA da Mobilemed. O projeto testa a aplicação **real**: o GitHub Actions sobe o PostgreSQL 17, a API NestJS e o front Angular do desafio e roda **78 testes automatizados** de API e de interface com Playwright, incluindo **responsividade** (celular e tablet) e **acessibilidade** (WCAG 2.1 AA).
 
 **Autor:** Haian Vilas Boas · [LinkedIn](https://www.linkedin.com/in/haian-vilas-boas-806647221/)
 
@@ -10,8 +10,9 @@ Solução do teste técnico de QA da Mobilemed. O projeto testa a aplicação **
 
 ## Resumo executivo
 
-- **65 testes** (58 de API e 7 de E2E): **43 passaram** e **22 falharam**. Cada falha é um defeito real, documentado.
-- **14 defeitos encontrados:** 1 crítico, 5 altos, 5 médios e 3 baixos. Foram 11 confirmados na execução e 3 bloqueados pelo defeito crítico.
+- **78 testes** (58 de API, 10 de interface no desktop e 10 de responsividade em celular e tablet): **51 passaram** e **27 falharam**. Cada falha é um defeito real, documentado.
+- **17 defeitos encontrados:** 1 crítico, 6 altos, 7 médios e 3 baixos. Foram 14 confirmados na execução e 3 bloqueados pelo defeito crítico.
+- **A interface não é responsiva**, apesar de o README do desafio prometer: no celular, o menu lateral fixo deixa só 177px de 412px para o conteúdo.
 - **Defeito crítico:** o cadastro de exames responde **201 Created, mas não grava o exame**. Pela interface aparece a mensagem de sucesso, e o exame não existe.
 - **Risco de LGPD:** as respostas de erro devolvem o **stack trace** da aplicação, numa plataforma com dados de saúde.
 
@@ -32,7 +33,10 @@ Solução do teste técnico de QA da Mobilemed. O projeto testa a aplicação **
 | API | Segurança e privacidade (LGPD) | 4 | 2 | 2 |
 | E2E | Login | 3 | 3 | 0 |
 | E2E | Pacientes e exames pela interface | 4 | 2 | 2 |
-| | **Total** | **65** | **43** | **22** |
+| E2E | Acessibilidade (axe-core, WCAG 2.1 AA) | 3 | 1 | 2 |
+| Mobile | Responsividade (Pixel 7, 412px) | 5 | 3 | 2 |
+| Tablet | Responsividade (768px) | 5 | 4 | 1 |
+| | **Total** | **78** | **51** | **27** |
 
 ## Defeitos encontrados
 
@@ -52,8 +56,19 @@ Solução do teste técnico de QA da Mobilemed. O projeto testa a aplicação **
 | BUG11 | Página vazia retorna 404 e `pageSize` sem limite | 🟢 Baixa | ✅ Confirmado |
 | BUG12 | Login inválido retorna 404 em vez de 401 | 🟢 Baixa | ✅ Confirmado |
 | BUG14 | E-mail do usuário exposto na resposta do login | 🟢 Baixa | ✅ Confirmado |
+| BUG15 | Interface não é responsiva: menu lateral fixo ocupa a tela no celular | 🟠 Alta | ✅ Confirmado |
+| BUG16 | Campo de busca ultrapassa a largura da tela no celular | 🟡 Média | ✅ Confirmado |
+| BUG17 | Acessibilidade: 57 botões sem nome, contraste e autocomplete | 🟡 Média | ✅ Confirmado |
 
 Cada defeito tem passos para reproduzir, causa provável no código e sugestão de correção no [relatório](docs/relatorio-de-bugs.md).
+
+### Responsividade no celular
+
+| Login (ok) | Lista de pacientes (BUG15) |
+|---|---|
+| <img src="docs/evidencias/mobile-login.png" width="260"> | <img src="docs/evidencias/mobile-pacientes.png" width="260"> |
+
+No celular, o login se adapta à tela, mas nas páginas internas o menu lateral fica sempre aberto e ocupa mais da metade da largura.
 
 ---
 
@@ -79,10 +94,10 @@ flowchart LR
 
 | Pasta | Conteúdo |
 |---|---|
-| `docs/` | Plano de testes, relatório de defeitos e resultados da execução |
+| `docs/` | Plano de testes, relatório de defeitos, resultados da execução e prints de evidência |
 | `features/` | Cenários BDD (Gherkin) de autenticação, pacientes e exames |
 | `tests/api/` | Autenticação, pacientes, exames, idempotência e segurança |
-| `tests/e2e/` | Interface com Page Objects: login, pacientes e exames |
+| `tests/e2e/` | Interface com Page Objects: login, pacientes e exames, responsividade (celular e tablet) e acessibilidade (axe-core) |
 | `tests/support/` | Geração de dados (CPF válido, chaves) e helpers de API |
 | `.github/workflows/qa.yml` | Pipeline que sobe a aplicação e roda tudo |
 

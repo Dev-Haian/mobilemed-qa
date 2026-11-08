@@ -12,6 +12,7 @@ const BUGS = {
   CT30: 'BUG01', CT33: 'BUG04 (bloqueado pelo BUG01)', CT34: 'BUG04 (bloqueado pelo BUG01)',
   CT36: 'BUG13 (bloqueado pelo BUG01)', CT37: 'BUG02', CT40: 'BUG01', CT42: 'BUG05 (bloqueado pelo BUG01)',
   CT43: 'BUG01', CT50: 'BUG02 · BUG06', CT53: 'BUG14', E2E12: 'BUG09', E2E13: 'BUG01',
+  R02: 'BUG15', R03: 'BUG16', A11Y02: 'BUG17', A11Y03: 'BUG17',
 };
 
 const rows = [];
@@ -19,7 +20,7 @@ const walk = (suite, path) => {
   const here = suite.title && !suite.title.endsWith('.ts') ? [...path, suite.title] : path;
   for (const spec of suite.specs ?? []) for (const t of spec.tests ?? []) {
     const r = t.results?.[t.results.length - 1];
-    const id = (spec.title.match(/^(CT\d+b?|E2E\d+)/) ?? [])[1] ?? '';
+    const id = (spec.title.match(/^(CT\d+b?|E2E\d+|R\d+|A11Y\d+)/) ?? [])[1] ?? '';
     rows.push({ project: t.projectName, group: here.join(' › ') || '-', title: spec.title, ok: r?.status === 'passed', ms: r?.duration ?? 0, bug: BUGS[id] ?? '' });
   }
   for (const s of suite.suites ?? []) walk(s, here);
@@ -34,7 +35,7 @@ const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
 
 const out = [];
 out.push('# Resultados da execução\n');
-out.push(`Execução de **${when}** (GitHub Actions, aplicação real com PostgreSQL 17 + API NestJS + front Angular) · duração dos testes: **${Math.round(report.stats.duration / 1000)} s**\n`);
+out.push(`Execução de **${when}** (GitHub Actions, aplicação real com PostgreSQL 17 + API NestJS + front Angular; interface em desktop, celular Pixel 7 e tablet 768px) · duração dos testes: **${Math.round(report.stats.duration / 1000)} s**\n`);
 out.push('| Total | ✅ Passaram | ❌ Falharam (defeitos) | Taxa de aprovação |');
 out.push('|---:|---:|---:|---:|');
 out.push(`| **${total}** | **${passed}** | **${failed}** | ${pct(passed, total)}% |\n`);
